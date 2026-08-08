@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+venv/
+.env
+
+# Models & data (large files)
+models/*.joblib
+models/*.keras
+models/*.h5
+data/landmarks/*.csv
+output/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Keep directory structure
+!models/.gitkeep
+!data/landmarks/.gitkeep
+!output/.gitkeep
