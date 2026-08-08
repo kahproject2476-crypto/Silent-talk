@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SilentTalk — ISL Communication</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🤟</text></svg>" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ── Navbar ─────────────────────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="brand">
+      <span class="brand-icon">🤟</span>
+      <div class="brand-text">
+        <span class="brand-name">SilentTalk</span>
+        <span class="brand-sub">ISL · TULU · AI</span>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-mode="sign">
+        <span class="tab-icon">🤟</span> Sign → Speech
+      </button>
+      <button class="nav-tab" data-mode="speech">
+        <span class="tab-icon">🎙️</span> Speech → Text
+      </button>
+      <button class="nav-tab" data-mode="about">
+        <span class="tab-icon">ℹ️</span> About
+      </button>
+    </div>
+
+    <div class="nav-right">
+      <div class="status-badge" id="modelStatus">
+        <span class="status-dot"></span>
+        <span class="status-text">Connecting...</span>
+      </div>
+      <div class="team-info">
+        <strong>Akshitha · Hardhika · Kavya</strong>
+        <span>CEC Mangaluru · 2025–26</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Pages ──────────────────────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- ══ SIGN MODE ══════════════════════════════════════════════════════ -->
+    <section class="page active" id="page-sign">
+      <div class="sign-layout">
+
+        <!-- Left: Camera -->
+        <div class="camera-panel">
+          <div class="panel-label">Live Camera Feed</div>
+
+          <div class="camera-frame" id="cameraFrame">
+            <img id="annotatedFeed" class="annotated-feed hidden" alt="Camera feed" />
+            <div class="camera-idle" id="cameraIdle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                <path d="M23 7l-7 5 7 5V7z"/>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+              </svg>
+              <p>Camera is off</p>
+              <span>Click Start Camera to begin</span>
+            </div>
+          </div>
+
+          <div class="gesture-display" id="gestureDisplay">
+            <div class="gesture-idle-text" id="gestureIdle">
+              🖐 Show a hand gesture to the camera
+            </div>
+            <div class="gesture-result hidden" id="gestureResult">
+              <div class="gesture-word" id="gestureWord">—</div>
+              <div class="gesture-meta">
+                <span class="gesture-conf-label" id="gestureConfLabel">0%</span>
+                <div class="conf-bar-track">
+                  <div class="conf-bar-fill" id="confBarFill"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="camera-controls">
+            <button class="btn btn-primary" id="startCameraBtn">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <polygon points="5,3 19,12 5,21"/>
+              </svg>
+              Start Camera
+            </button>
+            <button class="btn btn-danger hidden" id="stopCameraBtn">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+              </svg>
+              Stop Camera
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Output -->
+        <div class="output-panel">
+          <div class="panel-label">Recognition &amp; Translation</div>
+
+          <div class="sentence-section">
+            <div class="section-title">Recognized Sentence</div>
+            <div class="sentence-box" id="sentenceBox">
+              <span class="sentence-placeholder" id="sentencePlaceholder">Your sentence will appear here...</span>
+              <span class="sentence-text" id="sentenceText"></span>
+            </div>
+            <div class="sentence-actions">
+              <button class="btn btn-ghost" id="addWordBtn" title="Add current gesture to sentence">
+                ＋ Add Word
+              </button>
+              <button class="btn btn-ghost" id="backspaceBtn" title="Remove last word">
+                ⌫ Backspace
+              </button>
+              <button class="btn btn-ghost btn-danger-ghost" id="clearBtn" title="Clear sentence">
+                ✕ Clear
+              </button>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-full" id="translateBtn" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+            Translate to Tulu &amp; Speak
+          </button>
+
+          <div class="tulu-section hidden" id="tuluSection">
+            <div class="tulu-card">
+              <div class="tulu-card-label">Tulu Translation</div>
+              <div class="tulu-card-text" id="tuluText"></div>
+            </div>
+            <audio class="audio-player" id="audioPlayer" controls></audio>
+          </div>
+
+          <div class="spinner hidden" id="translateSpinner">
+            <div class="spin"></div>
+            <span>Translating...</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══ SPEECH MODE ═════════════════════════════════════════════════════ -->
+    <section class="page" id="page-speech">
+      <div class="speech-layout">
+
+        <div class="speech-card">
+          <div class="panel-label">Two-Way Communication — Hearing → Deaf</div>
+
+          <div class="speech-tabs">
+            <button class="speech-tab active" data-stab="upload">📁 Upload Audio</button>
+            <button class="speech-tab" data-stab="record">🎙️ Record (browser)</button>
+          </div>
+
+          <!-- Upload tab -->
+          <div class="stab-panel active" id="stab-upload">
+            <div class="upload-zone" id="uploadZone">
+              <div class="upload-icon">🎵</div>
+              <p class="upload-title">Drop an audio file here</p>
+              <p class="upload-sub">WAV · MP3 · M4A · WebM</p>
+              <input type="file" id="audioFileInput" accept=".wav,.mp3,.m4a,.webm" hidden />
+              <button class="btn btn-ghost" id="browseBtn">Browse File</button>
+            </div>
+            <div class="upload-preview hidden" id="uploadPreview">
+              <div class="file-badge" id="fileBadge"></div>
+              <audio class="audio-player" id="previewPlayer" controls></audio>
+              <button class="btn btn-primary" id="transcribeBtn">
+                🎤 Transcribe with Whisper
+              </button>
+            </div>
+          </div>
+
+          <!-- Record tab -->
+          <div class="stab-panel" id="stab-record">
+            <div class="record-center">
+              <div class="record-ring" id="recordRing">
+                <button class="record-btn" id="recordBtn">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                    <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4z"/>
+                    <path d="M19 10a7 7 0 0 1-14 0M12 19v4M8 23h8"/>
+                  </svg>
+                </button>
+              </div>
+              <p class="record-hint" id="recordHint">Click to start recording</p>
+              <button class="btn btn-primary hidden" id="transcribeRecordBtn">
+                🎤 Transcribe Recording
+              </button>
+            </div>
+          </div>
+
+          <!-- Spinner -->
+          <div class="spinner hidden" id="sttSpinner">
+            <div class="spin"></div>
+            <span>Transcribing with Whisper...</span>
+          </div>
+
+          <!-- Transcript output -->
+          <div class="transcript-box hidden" id="transcriptBox">
+            <div class="transcript-label">Transcript</div>
+            <div class="transcript-text" id="transcriptText"></div>
+            <button class="btn btn-ghost btn-danger-ghost btn-sm" id="clearTranscriptBtn">
+              ✕ Clear
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ ABOUT MODE ══════════════════════════════════════════════════════ -->
+    <section class="page" id="page-about">
+      <div class="about-layout">
+
+        <div class="about-hero">
+          <h1 class="about-title">SilentTalk</h1>
+          <p class="about-sub">Two-Way Communication Using Indian Sign Language Recognition</p>
+          <div class="about-badges">
+            <span class="badge badge-blue">MediaPipe</span>
+            <span class="badge badge-purple">Random Forest</span>
+            <span class="badge badge-indigo">CNN-LSTM</span>
+            <span class="badge badge-teal">IndicTrans2</span>
+            <span class="badge badge-green">Whisper</span>
+            <span class="badge badge-orange">gTTS</span>
+          </div>
+        </div>
+
+        <div class="about-grid">
+
+          <div class="about-card">
+            <div class="about-card-title">⚙️ System Architecture</div>
+            <div class="arch-flow">
+              <div class="arch-row">
+                <span class="arch-chip">📷 Webcam</span>
+                <span class="arch-arrow">→</span>
+                <span class="arch-chip">MediaPipe</span>
+                <span class="arch-arrow">→</span>
+                <span class="arch-chip">Random Forest</span>
+                <span class="arch-arrow">→</span>
+                <span class="arch-chip">English Text</span>
+              </div>
+              <div class="arch-down">↓</div>
+              <div class="arch-row">
+                <span class="arch-chip accent-purple">🔊 gTTS</span>
+                <span class="arch-arrow">←</span>
+                <span class="arch-chip accent-purple">IndicTrans2</span>
+                <span class="arch-arrow">←</span>
+                <span class="arch-chip accent-purple">Tulu Text</span>
+              </div>
+              <div class="arch-divider"></div>
+              <div class="arch-row">
+                <span class="arch-chip accent-green">🎙️ Microphone</span>
+                <span class="arch-arrow">→</span>
+                <span class="arch-chip accent-green">Whisper STT</span>
+                <span class="arch-arrow">→</span>
+                <span class="arch-chip accent-green">Text Output</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="about-card">
+            <div class="about-card-title">🎯 Project Objectives</div>
+            <ol class="objectives">
+              <li>Recognize ISL gestures in real-time using computer vision and deep learning</li>
+              <li>Translate recognized English text to Tulu with speech synthesis</li>
+              <li>Enable two-way communication between deaf and hearing users</li>
+              <li>Expand vocabulary using CNN-LSTM for dynamic gesture sequences</li>
+            </ol>
+          </div>
+
+          <div class="about-card">
+            <div class="about-card-title">📊 Model Status</div>
+            <div id="aboutModelInfo">
+              <div class="spinner">
+                <div class="spin"></div><span>Loading...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="about-card">
+            <div class="about-card-title">👩‍💻 Team</div>
+            <div class="team-grid">
+              <div class="member-card">
+                <div class="member-avatar">A</div>
+                <div class="member-name">Akshitha</div>
+              </div>
+              <div class="member-card">
+                <div class="member-avatar">H</div>
+                <div class="member-name">Hardhika V Shetty</div>
+              </div>
+              <div class="member-card">
+                <div class="member-avatar">K</div>
+                <div class="member-name">Kavya B</div>
+              </div>
+            </div>
+            <div class="guide-info">
+              <span class="guide-label">Guide</span>
+              <span class="guide-name">Mr. Kiran Ankalakoti</span>
+              <span class="guide-inst">Canara Engineering College, Mangaluru · AY 2025–26</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast notification -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
